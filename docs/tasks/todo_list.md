@@ -28,63 +28,63 @@ This checklist tracks the implementation of the Manga Reader Backend components.
 ---
 
 ## Phase 2: Manga Domain, Local Search & Feed
-- [ ] **Mangas Domain Structuring**
-  - [ ] Create directory `app/Domains/Mangas/`
-  - [ ] Create subdirectories: `Models/`, `Controllers/`, `DTOs/`, `Repositories/`, `Services/`, `Actions/`, `Jobs/`
-- [ ] **Database Setup**
-  - [ ] Create migration for `mangas` table:
-    - [ ] UUID primary key, title, description, cover_filename, status, last_synced_at
-    - [ ] Add `last_viewed_at` (timestamp, nullable) and `views_count` (unsigned integer, default 0)
-    - [ ] Add index on `title` and `last_viewed_at`
-  - [ ] Run migrations: `php artisan migrate`
-- [ ] **Models & Repositories**
-  - [ ] Implement `Manga` model inside `app/Domains/Mangas/Models/`
-  - [ ] Create `MangaRepository` to encapsulate database access
-- [ ] **External MangaDex Service**
-  - [ ] Add `.env` config keys: `MANGADEX_API_URL`, `MANGADEX_UPLOADS_URL`, `MANGADEX_SYNC_STALE_TTL`
-  - [ ] Implement `MangaDexService` (with `fetchDetails` method using Laravel's `Http` client)
-- [ ] **Endpoints & Actions**
-  - [ ] Create `MangaController`
-  - [ ] Implement `GET /api/manga/search` endpoint using local DB query (`WHERE title LIKE %query%`)
-  - [ ] Implement `GET /api/manga` feed endpoint ordering by latest chapter's created/updated date descending
-  - [ ] Create `SyncMangaAction` to synchronize details and save/update the local DB record
-  - [ ] Implement `GET /api/manga/{id}` details endpoint:
-    - [ ] Increment local `views_count` and set `last_viewed_at = now()`
-    - [ ] Real-time sync if missing from database
-    - [ ] Dispatch background sync job if stale (> 24 hours) and return existing data
-    - [ ] Return cached DB records directly if fresh
-- [ ] **Testing**
-  - [ ] Mock MangaDex details endpoint
-  - [ ] Write integration tests for:
-    - [ ] Local search (with LIKE queries)
-    - [ ] Feed endpoint (ordered by chapter updates)
-    - [ ] Detail retrieval (real-time sync logic, views counter check)
+- [x] **Mangas Domain Structuring**
+  - [x] Create directory `app/Domains/Mangas/`
+  - [x] Create subdirectories: `Models/`, `Controllers/`, `DTOs/`, `Repositories/`, `Services/`, `Actions/`, `Jobs/`
+- [x] **Database Setup**
+  - [x] Create migration for `mangas` table:
+    - [x] UUID primary key, title, description, cover_filename, status, last_synced_at
+    - [x] Add `last_viewed_at` (timestamp, nullable) and `views_count` (unsigned integer, default 0)
+    - [x] Add index on `title` and `last_viewed_at`
+  - [x] Run migrations: `php artisan migrate`
+- [x] **Models & Repositories**
+  - [x] Implement `Manga` model inside `app/Domains/Mangas/Models/`
+  - [x] Create `MangaRepository` to encapsulate database access
+- [x] **External MangaDex Service**
+  - [x] Add `.env` config keys: `MANGADEX_API_URL`, `MANGADEX_UPLOADS_URL`, `MANGADEX_SYNC_STALE_TTL`
+  - [x] Implement `MangaDexService` (with `fetchDetails` method using Laravel's `Http` client)
+- [x] **Endpoints & Actions**
+  - [x] Create `MangaController`
+  - [x] Implement `GET /api/manga/search` endpoint using local DB query (`WHERE title LIKE %query%`)
+  - [x] Implement `GET /api/manga` feed endpoint ordering by latest chapter's created/updated date descending
+  - [x] Create `SyncMangaAction` to synchronize details and save/update the local DB record
+  - [x] Implement `GET /api/manga/{id}` details endpoint:
+    - [x] Increment local `views_count` and set `last_viewed_at = now()`
+    - [x] Real-time sync if missing from database
+    - [x] Dispatch background sync job if stale (> 24 hours) and return existing data
+    - [x] Return cached DB records directly if fresh
+- [x] **Testing**
+  - [x] Mock MangaDex details endpoint
+  - [x] Write integration tests for:
+    - [x] Local search (with LIKE queries)
+    - [x] Feed endpoint (ordered by chapter updates)
+    - [x] Detail retrieval (real-time sync logic, views counter check)
 
 ---
 
 ## Phase 3: Chapters Domain & Image retrieval
-- [ ] **Chapters Domain Structuring**
-  - [ ] Create directory `app/Domains/Chapters/`
-  - [ ] Create subdirectories: `Models/`, `Controllers/`, `DTOs/`, `Repositories/`, `Services/`, `Actions/`
-- [ ] **Database Setup**
-  - [ ] Create migration for `chapters` table (UUID primary key, foreign key `manga_id` referencing `mangas.id` on delete cascade, title, chapter_number, volume_number, language, hash, pages, pages_saver, last_synced_at)
-  - [ ] Run migrations: `php artisan migrate`
-- [ ] **Models & Repositories**
-  - [ ] Implement `Chapter` model in `app/Domains/Chapters/Models/`
-  - [ ] Create `ChapterRepository` for database queries
-- [ ] **Chapters Feeding Integration**
-  - [ ] Add `fetchChapters` method to `MangaDexService` (hits `GET /manga/{id}/feed`)
-  - [ ] Update `SyncMangaAction` to fetch the list of English chapters and upsert them into the database during manga details sync
-- [ ] **Pages Retrieval Implementation**
-  - [ ] Add `fetchChapterPages` to `MangaDexService` (hits `@Home` server API `GET /at-home/server/{chapterId}`)
-  - [ ] Create `SyncChapterPagesAction` (performs `@Home` API call, stores page files arrays and hash, updates `last_synced_at`)
-  - [ ] Create `ChapterController` with route `GET /api/chapters/{id}/pages`
-  - [ ] Implement pages resolver in `ChapterController@show`:
-    - [ ] If pages/hash not stored or older than 24 hours: trigger `SyncChapterPagesAction` synchronously
-    - [ ] Build and return full URLs based on requested quality (`data` or `data-saver`) using `MANGADEX_UPLOADS_URL`
-- [ ] **Testing**
-  - [ ] Mock chapter list feed and At-Home server API endpoints
-  - [ ] Write feature tests for `/api/chapters/{id}/pages` testing URL construction and quality fallback parameters
+- [x] **Chapters Domain Structuring**
+  - [x] Create directory `app/Domains/Chapters/`
+  - [x] Create subdirectories: `Models/`, `Controllers/`, `DTOs/`, `Repositories/`, `Services/`, `Actions/`
+- [x] **Database Setup**
+  - [x] Create migration for `chapters` table (UUID primary key, foreign key `manga_id` referencing `mangas.id` on delete cascade, title, chapter_number, volume_number, language, hash, pages, pages_saver, last_synced_at)
+  - [x] Run migrations: `php artisan migrate`
+- [x] **Models & Repositories**
+  - [x] Implement `Chapter` model in `app/Domains/Chapters/Models/`
+  - [x] Create `ChapterRepository` for database queries
+- [x] **Chapters Feeding Integration**
+  - [x] Add `fetchChapters` method to `MangaDexService` (hits `GET /manga/{id}/feed`)
+  - [x] Update `SyncMangaAction` to fetch the list of English chapters and upsert them into the database during manga details sync
+- [x] **Pages Retrieval Implementation**
+  - [x] Add `fetchChapterPages` to `MangaDexService` (hits `@Home` server API `GET /at-home/server/{chapterId}`)
+  - [x] Create `SyncChapterPagesAction` (performs `@Home` API call, stores page files arrays and hash, updates `last_synced_at`)
+  - [x] Create `ChapterController` with route `GET /api/chapters/{id}/pages`
+  - [x] Implement pages resolver in `ChapterController@show`:
+    - [x] If pages/hash not stored or older than 24 hours: trigger `SyncChapterPagesAction` synchronously
+    - [x] Build and return full URLs based on requested quality (`data` or `data-saver`) using `MANGADEX_UPLOADS_URL`
+- [x] **Testing**
+  - [x] Mock chapter list feed and At-Home server API endpoints
+  - [x] Write feature tests for `/api/chapters/{id}/pages` testing URL construction and quality fallback parameters
 
 ---
 
