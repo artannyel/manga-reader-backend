@@ -97,6 +97,7 @@ class MangaTest extends TestCase
                         'title',
                         'description',
                         'status',
+                        'status_translated',
                         'cover_filename',
                         'cover_url',
                         'latest_chapter_date',
@@ -110,6 +111,8 @@ class MangaTest extends TestCase
         // First item in feed should be Manga B (most recent chapter is now)
         $this->assertEquals($mangaBId, $response->json('data.0.id'));
         $this->assertEquals($mangaAId, $response->json('data.1.id'));
+        $this->assertEquals('Finalizado', $response->json('data.0.status_translated'));
+        $this->assertEquals('Em andamento', $response->json('data.1.status_translated'));
     }
 
     /**
@@ -186,6 +189,8 @@ class MangaTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonPath('id', $mangaId)
             ->assertJsonPath('title', 'Manga Title Name')
+            ->assertJsonPath('status', 'ongoing')
+            ->assertJsonPath('status_translated', 'Em andamento')
             ->assertJsonPath('cover_filename', 'cover.jpg')
             ->assertJsonCount(1, 'chapters');
 
@@ -332,5 +337,61 @@ class MangaTest extends TestCase
 
         $this->assertDatabaseHas('mangas', ['id' => $mangaId]);
         $this->assertDatabaseHas('chapters', ['id' => $chapterId, 'hash' => 'chapterhash123']);
+    }
+
+    /**
+     * Test details endpoint returns 404 with translated message when manga is not found on MangaDex.
+     */
+    public function test_show_manga_details_not_found(): void
+    {
+        $mangaId = '99999999-9999-9999-9999-999999999999';
+
+        Http::fake([
+            "*/manga/{$mangaId}*" => Http::response(null, 404)
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/manga/{$mangaId}");
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Mangá não encontrado'
+            ]);
+    }
+
+    /**
+     * Test fetching chapter pages returns 404 with translated message when chapter is not found.
+     */
+    public function test_show_chapter_pages_not_found(): void
+    {
+        $chapterId = '99999999-9999-9999-9999-999999999999';
+
+        Http::fake([
+            "*/chapter/{$chapterId}*" => Http::response(null, 404)
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/chapters/{$chapterId}/pages");
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Capítulo não encontrado'
+            ]);
+    }
+
+    /**
+     * Test fetching chapter pages validation fails with Portuguese translation message when quality is invalid.
+     */
+    public function test_show_chapter_pages_invalid_quality_validation(): void
+    {
+        $chapterId = '88888888-8888-8888-8888-888888888888';
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/chapters/{$chapterId}/pages?quality=invalid_quality");
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors([
+                'quality' => 'A qualidade selecionada é inválida. Valores permitidos: data, data-saver.'
+            ]);
     }
 }

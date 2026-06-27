@@ -35,6 +35,7 @@ class MangaSyncQueueTest extends TestCase
         Manga::create([
             'id' => $mangaId,
             'title' => 'Stale Manga',
+            'status' => 'ongoing',
             'last_synced_at' => now()->subHours(25), // > 24 hours
             'last_viewed_at' => now()->subDays(1),
             'views_count' => 10,
@@ -43,7 +44,8 @@ class MangaSyncQueueTest extends TestCase
         $response = $this->actingAs($this->user)
             ->getJson("/api/manga/{$mangaId}");
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonPath('status_translated', 'Em andamento');
 
         Queue::assertPushed(SyncMangaDetailsJob::class, function (SyncMangaDetailsJob $job) use ($mangaId) {
             return $job->mangaId === $mangaId;
@@ -61,6 +63,7 @@ class MangaSyncQueueTest extends TestCase
         Manga::create([
             'id' => $mangaId,
             'title' => 'Fresh Manga',
+            'status' => 'completed',
             'last_synced_at' => now()->subHours(5), // < 24 hours
             'last_viewed_at' => now()->subHours(1),
             'views_count' => 10,
@@ -69,7 +72,8 @@ class MangaSyncQueueTest extends TestCase
         $response = $this->actingAs($this->user)
             ->getJson("/api/manga/{$mangaId}");
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonPath('status_translated', 'Finalizado');
 
         Queue::assertNotPushed(SyncMangaDetailsJob::class);
     }

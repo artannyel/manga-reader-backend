@@ -41,7 +41,7 @@ class ChapterPagesRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'quality.in' => 'The selected quality is invalid. Allowed values: data, data-saver.',
+            'quality.in' => 'A qualidade selecionada é inválida. Valores permitidos: data, data-saver.',
         ];
     }
 }

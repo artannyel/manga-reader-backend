@@ -53,7 +53,7 @@ class AuthService
         $user = $this->userRepository->findByEmail($dto->email);
 
         if (!$user || !Hash::check($dto->password, $user->password)) {
-            throw new AuthenticationException(__('auth.failed'));
+            throw new AuthenticationException('Credenciais inválidas.');
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

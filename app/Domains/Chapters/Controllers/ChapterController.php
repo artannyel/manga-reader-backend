@@ -46,10 +46,10 @@ class ChapterController extends Controller
                 $chapter = $this->chapterRepository->find($id);
 
                 if (!$chapter) {
-                    return response()->json(['message' => 'Chapter not found'], 404);
+                    return response()->json(['message' => 'Capítulo não encontrado'], 404);
                 }
             } catch (\Throwable $e) {
-                return response()->json(['message' => 'Chapter not found'], 404);
+                return response()->json(['message' => 'Capítulo não encontrado'], 404);
             }
         }
 
@@ -64,7 +64,7 @@ class ChapterController extends Controller
                 $chapter = $this->syncChapterPagesAction->execute($chapter);
             } catch (\Throwable $e) {
                 if (empty($chapter->hash) || empty($chapter->pages)) {
-                    return response()->json(['message' => 'Failed to retrieve chapter pages'], 500);
+                    return response()->json(['message' => 'Falha ao recuperar as páginas do capítulo'], 500);
                 }
             }
         }

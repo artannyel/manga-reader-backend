@@ -52,7 +52,10 @@ class AuthTest extends TestCase
         ];
 
         $response = $this->postJson('/api/register', $payload);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors([
+                'email' => 'O campo email é obrigatório.'
+            ]);
 
         // Mismatched password confirmation
         $payload = [
@@ -63,7 +66,10 @@ class AuthTest extends TestCase
         ];
 
         $response = $this->postJson('/api/register', $payload);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors([
+                'password' => 'A confirmação do campo password não confere.'
+            ]);
     }
 
     /**
@@ -83,7 +89,10 @@ class AuthTest extends TestCase
         ];
 
         $response = $this->postJson('/api/register', $payload);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors([
+                'email' => 'O valor do campo email já está em uso.'
+            ]);
     }
 
     /**
@@ -121,7 +130,11 @@ class AuthTest extends TestCase
         ];
 
         $response = $this->postJson('/api/login', $payload);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors([
+                'email' => 'O campo email é obrigatório.',
+                'password' => 'O campo password é obrigatório.'
+            ]);
     }
 
     /**
@@ -140,7 +153,10 @@ class AuthTest extends TestCase
         ];
 
         $response = $this->postJson('/api/login', $payload);
-        $response->assertStatus(401);
+        $response->assertStatus(401)
+            ->assertJsonFragment([
+                'message' => 'Credenciais inválidas.'
+            ]);
     }
 
     /**
@@ -154,7 +170,10 @@ class AuthTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->postJson('/api/logout');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Logout realizado com sucesso',
+            ]);
 
         // Assert token is removed from database
         $this->assertDatabaseCount('personal_access_tokens', 0);

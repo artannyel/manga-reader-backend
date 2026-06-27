@@ -17,6 +17,7 @@ class MangaDetailsDto
         public readonly string $title,
         public readonly ?string $description,
         public readonly ?string $status,
+        public readonly ?string $statusTranslated,
         public readonly ?string $coverFilename,
         public readonly ?string $coverUrl,
         public readonly ?string $lastSyncedAt,
@@ -34,11 +35,20 @@ class MangaDetailsDto
             return ChapterDto::fromModel($chapter);
         })->all();
 
+        $statusTranslated = match ($manga->status) {
+            'ongoing' => 'Em andamento',
+            'completed' => 'Finalizado',
+            'hiatus' => 'Em hiato',
+            'cancelled' => 'Cancelado',
+            default => $manga->status,
+        };
+
         return new self(
             id: $manga->id,
             title: $manga->title,
             description: $manga->description,
             status: $manga->status,
+            statusTranslated: $statusTranslated,
             coverFilename: $manga->cover_filename,
             coverUrl: $manga->cover_url,
             lastSyncedAt: $manga->last_synced_at?->toISOString(),
@@ -60,6 +70,7 @@ class MangaDetailsDto
             'title' => $this->title,
             'description' => $this->description,
             'status' => $this->status,
+            'status_translated' => $this->statusTranslated,
             'cover_filename' => $this->coverFilename,
             'cover_url' => $this->coverUrl,
             'last_synced_at' => $this->lastSyncedAt,

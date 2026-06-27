@@ -98,7 +98,7 @@ class MangaController extends Controller
                     'last_viewed_at' => now(),
                 ]);
             } catch (\Throwable $e) {
-                return response()->json(['message' => 'Manga not found'], 404);
+                return response()->json(['message' => 'Mangá não encontrado'], 404);
             }
         } else {
             // Increment views_count and set last_viewed_at = now()
