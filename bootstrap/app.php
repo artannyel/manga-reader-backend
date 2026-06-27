@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        \App\Domains\Mangas\Console\Commands\DailySyncCommand::class,
+        \App\Domains\Mangas\Console\Commands\HourlySyncCommand::class,
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         //
     })

@@ -87,4 +87,17 @@ class MangaRepository
     {
         return Manga::updateOrCreate($attributes, $values);
     }
+
+    /**
+     * Get mangas viewed within the last specified number of days.
+     *
+     * @param int $days
+     * @return Collection<int, Manga>
+     */
+    public function getRecentlyViewed(int $days = 7): Collection
+    {
+        return Manga::query()
+            ->where('last_viewed_at', '>=', now()->subDays($days))
+            ->get();
+    }
 }
