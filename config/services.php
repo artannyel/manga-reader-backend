@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'mangadex' => [
+        'api_url' => env('MANGADEX_API_URL', 'https://api.mangadex.org'),
+        'uploads_url' => env('MANGADEX_UPLOADS_URL', 'https://uploads.mangadex.org'),
+    ],
+
 ];
+
