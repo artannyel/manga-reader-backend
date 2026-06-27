@@ -18,6 +18,31 @@ class MangaDexService
     }
 
     /**
+     * Fetch the top recently updated mangas from MangaDex.
+     *
+     * @param int $limit
+     * @return array<int, string>
+     */
+    public function fetchRecentlyUpdated(int $limit = 100): array
+    {
+        $response = Http::get("{$this->apiUrl}/manga", [
+            'limit' => $limit,
+            'order' => [
+                'latestUploadedChapter' => 'desc',
+            ],
+            'includes' => ['cover_art'],
+        ]);
+
+        if ($response->failed()) {
+            $response->throw();
+        }
+
+        $data = $response->json('data') ?? [];
+
+        return array_map(fn ($item) => $item['id'], $data);
+    }
+
+    /**
      * Fetch manga details and its cover art from MangaDex.
      *
      * @param string $mangaId

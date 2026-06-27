@@ -7,6 +7,7 @@ namespace App\Domains\Mangas\Controllers;
 use App\Domains\Mangas\Actions\SyncMangaAction;
 use App\Domains\Mangas\DTOs\MangaDetailsDto;
 use App\Domains\Mangas\DTOs\MangaDto;
+use App\Domains\Mangas\Jobs\SyncMangaDetailsJob;
 use App\Domains\Mangas\Repositories\MangaRepository;
 use App\Domains\Mangas\Requests\MangaIndexRequest;
 use App\Domains\Mangas\Requests\MangaSearchRequest;
@@ -104,13 +105,9 @@ class MangaController extends Controller
             $manga->increment('views_count');
             $manga->update(['last_viewed_at' => now()]);
 
-            // If stale (> 24 hours), update synchronously (Phase 4 will offload to queue)
+            // If stale (> 24 hours), update asynchronously using the background queue
             if (!$manga->last_synced_at || $manga->last_synced_at->diffInSeconds(now()) > 86400) {
-                try {
-                    $manga = $this->syncMangaAction->execute($id);
-                } catch (\Throwable $e) {
-                    // Fall back to current data in DB if API fails
-                }
+                SyncMangaDetailsJob::dispatch($id);
             }
         }
 
