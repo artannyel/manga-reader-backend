@@ -89,19 +89,19 @@ This checklist tracks the implementation of the Manga Reader Backend components.
 ---
 
 ## Phase 4: Sync Queues & Scheduler
-- [ ] **Queue Setup**
-  - [ ] Set `QUEUE_CONNECTION=database` in `.env`
-  - [ ] Create and execute queue database tables (`php artisan queue:table && php artisan migrate`)
-- [ ] **Background Sync Job**
-  - [ ] Create job `SyncMangaDetailsJob` calling `SyncMangaAction` inside the handle method
-  - [ ] Update `MangaController@show` to dispatch `SyncMangaDetailsJob` to the queue when details are stale (> 24 hours)
-- [ ] **Artisan Commands**
-  - [ ] Implement Artisan Command `manga:daily-sync` (fetches top 100 updated mangas from MangaDex, dispatches sync job for each)
-  - [ ] Implement Artisan Command `manga:hourly-sync` (queries local mangas viewed in the last 7 days, dispatches sync job for each)
-- [ ] **Scheduling Tasks**
-  - [ ] Register `manga:daily-sync` to run daily in `routes/console.php`
-  - [ ] Register `manga:hourly-sync` to run hourly in `routes/console.php`
-- [ ] **Testing & Verification**
-  - [ ] Verify that hitting a stale manga details endpoint schedules a background job in the `jobs` table
-  - [ ] Verify manual and scheduled runs of `manga:daily-sync` and `manga:hourly-sync`
-  - [ ] Ensure rate limits are respected by verifying throttle handling or dispatch delays
+- [x] **Queue Setup**
+  - [x] Set `QUEUE_CONNECTION=database` in `.env`
+  - [x] Create and execute queue database tables (`php artisan queue:table && php artisan migrate`)
+- [x] **Background Sync Job**
+  - [x] Create job `SyncMangaDetailsJob` calling `SyncMangaAction` inside the handle method
+  - [x] Update `MangaController@show` to dispatch `SyncMangaDetailsJob` to the queue when details are stale (> 24 hours)
+- [x] **Artisan Commands**
+  - [x] Implement Artisan Command `manga:daily-sync` (fetches top 100 updated mangas from MangaDex, dispatches sync job for each)
+  - [x] Implement Artisan Command `manga:hourly-sync` (queries local mangas viewed in the last 7 days, dispatches sync job for each)
+- [x] **Scheduling Tasks**
+  - [x] Register `manga:daily-sync` to run daily in `routes/console.php`
+  - [x] Register `manga:hourly-sync` to run hourly in `routes/console.php`
+- [x] **Testing & Verification**
+  - [x] Verify that hitting a stale manga details endpoint schedules a background job in the `jobs` table
+  - [x] Verify manual and scheduled runs of `manga:daily-sync` and `manga:hourly-sync`
+  - [x] Ensure rate limits are respected by verifying throttle handling or dispatch delays
