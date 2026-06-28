@@ -13,7 +13,8 @@ class ChapterDto
         public readonly ?string $title,
         public readonly string $chapterNumber,
         public readonly ?string $volumeNumber,
-        public readonly string $language
+        public readonly string $language,
+        public readonly int $pagesCount
     ) {}
 
     /**
@@ -26,7 +27,8 @@ class ChapterDto
             title: $chapter->title,
             chapterNumber: $chapter->chapter_number,
             volumeNumber: $chapter->volume_number,
-            language: $chapter->language
+            language: $chapter->language,
+            pagesCount: (int) $chapter->pages_count
         );
     }
 
@@ -43,6 +45,7 @@ class ChapterDto
             'chapter_number' => $this->chapterNumber,
             'volume_number' => $this->volumeNumber,
             'language' => $this->language,
+            'pages_count' => $this->pagesCount,
         ];
     }
 }

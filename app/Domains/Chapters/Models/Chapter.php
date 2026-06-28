@@ -43,6 +43,7 @@ class Chapter extends Model
         'chapter_number',
         'volume_number',
         'language',
+        'pages_count',
         'hash',
         'pages',
         'pages_saver',
@@ -59,6 +60,7 @@ class Chapter extends Model
         return [
             'pages' => 'array',
             'pages_saver' => 'array',
+            'pages_count' => 'integer',
             'last_synced_at' => 'datetime',
         ];
     }

@@ -53,6 +53,7 @@ class SyncMangaAction
                     'chapter_number' => $chapter['chapter_number'],
                     'volume_number' => $chapter['volume_number'],
                     'language' => $chapter['language'],
+                    'pages_count' => $chapter['pages_count'],
                     'hash' => null,
                     'pages' => null,
                     'pages_saver' => null,

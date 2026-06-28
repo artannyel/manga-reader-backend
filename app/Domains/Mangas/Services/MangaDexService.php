@@ -32,6 +32,7 @@ class MangaDexService
             $response = Http::get("{$this->apiUrl}/manga", [
                 'limit' => $chunkLimit,
                 'offset' => $offset,
+                'title' => 'Boruto',
                 'order' => [
                     'latestUploadedChapter' => 'desc',
                 ],
@@ -104,7 +105,7 @@ class MangaDexService
      * Fetch chapters for a manga in all languages.
      *
      * @param string $mangaId
-     * @return array<int, array{id: string, title: ?string, chapter_number: string, volume_number: ?string, language: string}>
+     * @return array<int, array{id: string, title: ?string, chapter_number: string, volume_number: ?string, language: string, pages_count: int}>
      */
     public function fetchChapters(string $mangaId): array
     {
@@ -138,6 +139,7 @@ class MangaDexService
                     'chapter_number' => $attributes['chapter'] ?? '0',
                     'volume_number' => $attributes['volume'] ?? null,
                     'language' => $attributes['translatedLanguage'] ?? 'en',
+                    'pages_count' => $attributes['pages'] ?? 0,
                 ];
             }
 

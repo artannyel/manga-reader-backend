@@ -29,6 +29,7 @@ class SyncChapterPagesAction
             'hash' => $pagesInfo['hash'],
             'pages' => $pagesInfo['pages'],
             'pages_saver' => $pagesInfo['pages_saver'],
+            'pages_count' => count($pagesInfo['pages']),
             'last_synced_at' => now(),
         ]);
 
