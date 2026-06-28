@@ -15,24 +15,25 @@ class DailySyncCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'manga:daily-sync';
+    protected $signature = 'manga:daily-sync {--limit=100 : The maximum number of recently updated mangas to sync}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Fetch the top 100 recently updated mangas from MangaDex and dispatch sync jobs.';
+    protected $description = 'Fetch recently updated mangas from MangaDex and dispatch sync jobs.';
 
     /**
      * Execute the console command.
      */
     public function handle(MangaDexService $mangaDexService): int
     {
+        $limit = (int) $this->option('limit');
         $this->info('Fetching recently updated mangas from MangaDex...');
 
         try {
-            $mangaIds = $mangaDexService->fetchRecentlyUpdated(100);
+            $mangaIds = $mangaDexService->fetchRecentlyUpdated($limit);
         } catch (\Throwable $e) {
             $this->error('Failed to fetch recently updated mangas: ' . $e->getMessage());
             return Command::FAILURE;

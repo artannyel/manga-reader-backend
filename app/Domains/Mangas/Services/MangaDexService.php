@@ -18,28 +18,46 @@ class MangaDexService
     }
 
     /**
-     * Fetch the top recently updated mangas from MangaDex.
+     * Fetch recently updated mangas from MangaDex (paginated).
      *
-     * @param int $limit
+     * @param int $total
      * @return array<int, string>
      */
-    public function fetchRecentlyUpdated(int $limit = 100): array
+    public function fetchRecentlyUpdated(int $total = 100): array
     {
-        $response = Http::get("{$this->apiUrl}/manga", [
-            'limit' => $limit,
-            'order' => [
-                'latestUploadedChapter' => 'desc',
-            ],
-            'includes' => ['cover_art'],
-        ]);
+        $mangaIds = [];
+        $limit = 100;
+        for ($offset = 0; $offset < $total; $offset += $limit) {
+            $chunkLimit = min($limit, $total - $offset);
+            $response = Http::get("{$this->apiUrl}/manga", [
+                'limit' => $chunkLimit,
+                'offset' => $offset,
+                'order' => [
+                    'latestUploadedChapter' => 'desc',
+                ],
+                'includes' => ['cover_art'],
+            ]);
 
-        if ($response->failed()) {
-            $response->throw();
+            if ($response->failed()) {
+                $response->throw();
+            }
+
+            $data = $response->json('data') ?? [];
+            if (empty($data)) {
+                break;
+            }
+
+            foreach ($data as $item) {
+                $mangaIds[] = $item['id'];
+            }
+
+            if (count($data) < $chunkLimit) {
+                break;
+            }
+
+            usleep(200000);
         }
-
-        $data = $response->json('data') ?? [];
-
-        return array_map(fn ($item) => $item['id'], $data);
+        return $mangaIds;
     }
 
     /**

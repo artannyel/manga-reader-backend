@@ -109,6 +109,31 @@ class MangaSyncQueueTest extends TestCase
     }
 
     /**
+     * Test daily sync command paginates correctly when limit exceeds chunk size.
+     */
+    public function test_daily_sync_command_paginates_correctly(): void
+    {
+        Queue::fake();
+        Http::fake([
+            '*/manga*' => Http::sequence()
+                ->push([
+                    'data' => array_map(fn($i) => ['id' => "manga-{$i}"], range(1, 100))
+                ], 200)
+                ->push([
+                    'data' => array_map(fn($i) => ['id' => "manga-{$i}"], range(101, 150))
+                ], 200)
+        ]);
+
+        $this->artisan('manga:daily-sync --limit=150')
+            ->assertSuccessful()
+            ->expectsOutput('Fetching recently updated mangas from MangaDex...')
+            ->expectsOutput('Found 150 updated mangas. Dispatching sync jobs...')
+            ->expectsOutput('All sync jobs have been dispatched to the queue.');
+
+        Queue::assertPushed(SyncMangaDetailsJob::class, 150);
+    }
+
+    /**
      * Test hourly sync command dispatches sync jobs for recently viewed mangas.
      */
     public function test_hourly_sync_command_dispatches_jobs_for_recently_viewed(): void
