@@ -32,7 +32,6 @@ class MangaDexService
             $response = Http::get("{$this->apiUrl}/manga", [
                 'limit' => $chunkLimit,
                 'offset' => $offset,
-                'title' => 'Boruto',
                 'order' => [
                     'latestUploadedChapter' => 'desc',
                 ],
