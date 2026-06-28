@@ -17,6 +17,17 @@ class ChapterRepository
     }
 
     /**
+     * Find an alternative chapter by manga ID, chapter number, and language.
+     */
+    public function findAlternativeLanguage(string $mangaId, string $chapterNumber, string $language): ?Chapter
+    {
+        return Chapter::where('manga_id', $mangaId)
+            ->where('chapter_number', $chapterNumber)
+            ->where('language', $language)
+            ->first();
+    }
+
+    /**
      * Upsert a list of chapters.
      *
      * @param array<int, array<string, mixed>> $chapters

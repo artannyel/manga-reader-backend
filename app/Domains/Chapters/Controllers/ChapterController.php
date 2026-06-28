@@ -32,6 +32,7 @@ class ChapterController extends Controller
     public function showPages(string $id, ChapterPagesRequest $request): JsonResponse
     {
         $quality = $request->input('quality', 'data');
+        $language = $request->input('language');
 
         $chapter = $this->chapterRepository->find($id);
 
@@ -59,6 +60,18 @@ class ChapterController extends Controller
             }
         }
 
+        if ($language && $chapter && $chapter->language !== $language) {
+            $alternativeChapter = $this->chapterRepository->findAlternativeLanguage(
+                $chapter->manga_id,
+                $chapter->chapter_number,
+                $language
+            );
+
+            if ($alternativeChapter) {
+                $chapter = $alternativeChapter;
+            }
+        }
+
         // Check if pages are missing or stale (older than 24 hours)
         if (
             empty($chapter->hash) ||
@@ -70,7 +83,7 @@ class ChapterController extends Controller
                 $chapter = $this->syncChapterPagesAction->execute($chapter);
             } catch (\Throwable $e) {
                 Log::error('Erro ao sincronizar páginas do capítulo com a API externa.', [
-                    'chapter_id' => $id,
+                    'chapter_id' => $chapter->id,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);

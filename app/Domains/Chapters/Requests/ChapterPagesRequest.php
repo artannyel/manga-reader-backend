@@ -30,6 +30,10 @@ class ChapterPagesRequest extends FormRequest
                 'string',
                 Rule::in(['data', 'data-saver']),
             ],
+            'language' => [
+                'nullable',
+                'string',
+            ],
         ];
     }
 

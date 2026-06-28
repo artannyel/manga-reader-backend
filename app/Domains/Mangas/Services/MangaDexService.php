@@ -79,18 +79,8 @@ class MangaDexService
         $data = $response->json('data') ?? [];
         $attributes = $data['attributes'] ?? [];
 
-        // Parse localized title (prefer english 'en', fallback to first available)
-        $title = $attributes['title']['en'] ?? null;
-        if (!$title && !empty($attributes['title'])) {
-            $title = reset($attributes['title']);
-        }
-        $title = $title ?? '';
-
-        // Parse localized description (prefer english 'en', fallback to first available)
-        $description = $attributes['description']['en'] ?? null;
-        if (!$description && !empty($attributes['description'])) {
-            $description = reset($attributes['description']);
-        }
+        $title = $this->resolveLocalizedText($attributes['title'] ?? []);
+        $description = $this->resolveLocalizedText($attributes['description'] ?? []) ?: null;
 
         // Find cover filename in relationships
         $coverFilename = null;
@@ -111,37 +101,52 @@ class MangaDexService
     }
 
     /**
-     * Fetch English chapters for a manga.
+     * Fetch chapters for a manga in all languages.
      *
      * @param string $mangaId
      * @return array<int, array{id: string, title: ?string, chapter_number: string, volume_number: ?string, language: string}>
      */
     public function fetchChapters(string $mangaId): array
     {
-        $response = Http::get("{$this->apiUrl}/manga/{$mangaId}/feed", [
-            'limit' => 500,
-            'translatedLanguage' => ['en'],
-            'order' => [
-                'chapter' => 'asc',
-            ],
-        ]);
-
-        if ($response->failed()) {
-            $response->throw();
-        }
-
         $chapters = [];
-        $data = $response->json('data') ?? [];
+        $limit = 500;
+        $offset = 0;
 
-        foreach ($data as $item) {
-            $attributes = $item['attributes'] ?? [];
-            $chapters[] = [
-                'id' => $item['id'],
-                'title' => $attributes['title'] ?? null,
-                'chapter_number' => $attributes['chapter'] ?? '0',
-                'volume_number' => $attributes['volume'] ?? null,
-                'language' => $attributes['translatedLanguage'] ?? 'en',
-            ];
+        while (true) {
+            $response = Http::get("{$this->apiUrl}/manga/{$mangaId}/feed", [
+                'limit' => $limit,
+                'offset' => $offset,
+                'order' => [
+                    'chapter' => 'asc',
+                ],
+            ]);
+
+            if ($response->failed()) {
+                $response->throw();
+            }
+
+            $data = $response->json('data') ?? [];
+            if (empty($data)) {
+                break;
+            }
+
+            foreach ($data as $item) {
+                $attributes = $item['attributes'] ?? [];
+                $chapters[] = [
+                    'id' => $item['id'],
+                    'title' => $attributes['title'] ?? null,
+                    'chapter_number' => $attributes['chapter'] ?? '0',
+                    'volume_number' => $attributes['volume'] ?? null,
+                    'language' => $attributes['translatedLanguage'] ?? 'en',
+                ];
+            }
+
+            if (count($data) < $limit) {
+                break;
+            }
+
+            $offset += $limit;
+            usleep(200000);
         }
 
         return $chapters;
@@ -191,6 +196,27 @@ class MangaDexService
         }
 
         throw new \Exception("Manga relationship not found for chapter {$chapterId}");
+    }
+
+    /**
+     * Resolve localized text based on language priority: pt-br -> pt -> en -> first available.
+     *
+     * @param array<string, string> $localizedMap
+     * @return string
+     */
+    private function resolveLocalizedText(array $localizedMap): string
+    {
+        if (empty($localizedMap)) {
+            return '';
+        }
+
+        foreach (['pt-br', 'pt', 'en'] as $lang) {
+            if (isset($localizedMap[$lang]) && $localizedMap[$lang] !== '') {
+                return $localizedMap[$lang];
+            }
+        }
+
+        return (string) reset($localizedMap);
     }
 }
 

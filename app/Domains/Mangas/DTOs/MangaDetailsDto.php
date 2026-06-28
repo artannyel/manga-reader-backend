@@ -11,6 +11,7 @@ class MangaDetailsDto
 {
     /**
      * @param array<int, ChapterDto> $chapters
+     * @param array<int, string> $availableLanguages
      */
     public function __construct(
         public readonly string $id,
@@ -23,7 +24,8 @@ class MangaDetailsDto
         public readonly ?string $lastSyncedAt,
         public readonly ?string $lastViewedAt,
         public readonly int $viewsCount,
-        public readonly array $chapters
+        public readonly array $chapters,
+        public readonly array $availableLanguages
     ) {}
 
     /**
@@ -34,6 +36,13 @@ class MangaDetailsDto
         $chapters = $manga->chapters->map(function ($chapter) {
             return ChapterDto::fromModel($chapter);
         })->all();
+
+        $availableLanguages = $manga->chapters
+            ->pluck('language')
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
 
         $statusTranslated = match ($manga->status) {
             'ongoing' => 'Em andamento',
@@ -54,7 +63,8 @@ class MangaDetailsDto
             lastSyncedAt: $manga->last_synced_at?->toISOString(),
             lastViewedAt: $manga->last_viewed_at?->toISOString(),
             viewsCount: (int) $manga->views_count,
-            chapters: $chapters
+            chapters: $chapters,
+            availableLanguages: $availableLanguages
         );
     }
 
@@ -77,6 +87,7 @@ class MangaDetailsDto
             'last_viewed_at' => $this->lastViewedAt,
             'views_count' => $this->viewsCount,
             'chapters' => array_map(fn(ChapterDto $dto) => $dto->toArray(), $this->chapters),
+            'available_languages' => $this->availableLanguages,
         ];
     }
 }
