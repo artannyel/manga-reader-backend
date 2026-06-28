@@ -41,7 +41,7 @@ class ChapterRepository
         Chapter::upsert(
             $chapters,
             ['manga_id', 'chapter_number', 'language'],
-            ['title', 'volume_number', 'updated_at']
+            ['title', 'volume_number', 'pages_count', 'updated_at']
         );
     }
 
