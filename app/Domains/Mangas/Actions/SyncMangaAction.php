@@ -62,6 +62,15 @@ class SyncMangaAction
                 ];
             }, $chaptersData);
 
+            $uniqueChapters = [];
+            foreach ($chapters as $chapter) {
+                $key = $chapter['chapter_number'] . '-' . $chapter['language'];
+                if (!isset($uniqueChapters[$key])) {
+                    $uniqueChapters[$key] = $chapter;
+                }
+            }
+            $chapters = array_values($uniqueChapters);
+
             $this->chapterRepository->upsertChapters($chapters);
 
             // Reload manga with sorted chapters
