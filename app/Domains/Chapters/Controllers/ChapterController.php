@@ -11,6 +11,7 @@ use App\Domains\Mangas\Actions\SyncMangaAction;
 use App\Domains\Mangas\Services\MangaDexService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class ChapterController extends Controller
 {
@@ -49,6 +50,11 @@ class ChapterController extends Controller
                     return response()->json(['message' => 'Capítulo não encontrado'], 404);
                 }
             } catch (\Throwable $e) {
+                Log::error('Erro ao buscar/sincronizar capítulo não cadastrado no banco local.', [
+                    'chapter_id' => $id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
                 return response()->json(['message' => 'Capítulo não encontrado'], 404);
             }
         }
@@ -63,6 +69,11 @@ class ChapterController extends Controller
             try {
                 $chapter = $this->syncChapterPagesAction->execute($chapter);
             } catch (\Throwable $e) {
+                Log::error('Erro ao sincronizar páginas do capítulo com a API externa.', [
+                    'chapter_id' => $id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
                 if (empty($chapter->hash) || empty($chapter->pages)) {
                     return response()->json(['message' => 'Falha ao recuperar as páginas do capítulo'], 500);
                 }
