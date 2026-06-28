@@ -36,7 +36,7 @@ class MangaRepository
     public function search(string $title, int $limit = 10, int $offset = 0): Collection
     {
         return Manga::query()
-            ->where('title', 'like', "%{$title}%")
+            ->whereRaw('LOWER(title) LIKE ?', ["%" . strtolower($title) . "%"])
             ->offset($offset)
             ->limit($limit)
             ->get();
@@ -48,7 +48,7 @@ class MangaRepository
     public function countSearch(string $title): int
     {
         return Manga::query()
-            ->where('title', 'like', "%{$title}%")
+            ->whereRaw('LOWER(title) LIKE ?', ["%" . strtolower($title) . "%"])
             ->count();
     }
 
