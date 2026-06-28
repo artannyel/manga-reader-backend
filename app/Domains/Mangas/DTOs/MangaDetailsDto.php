@@ -12,11 +12,13 @@ class MangaDetailsDto
     /**
      * @param array<int, ChapterDto> $chapters
      * @param array<int, string> $availableLanguages
+     * @param array<string, string> $descriptions
      */
     public function __construct(
         public readonly string $id,
         public readonly string $title,
         public readonly ?string $description,
+        public readonly array $descriptions,
         public readonly ?string $status,
         public readonly ?string $statusTranslated,
         public readonly ?string $coverFilename,
@@ -52,10 +54,14 @@ class MangaDetailsDto
             default => $manga->status,
         };
 
+        $descriptions = $manga->description;
+        $defaultDesc = $descriptions['pt-br'] ?? $descriptions['pt'] ?? $descriptions['en'] ?? (reset($descriptions) ?: '');
+
         return new self(
             id: $manga->id,
             title: $manga->title,
-            description: $manga->description,
+            description: $defaultDesc,
+            descriptions: $descriptions,
             status: $manga->status,
             statusTranslated: $statusTranslated,
             coverFilename: $manga->cover_filename,
@@ -79,6 +85,7 @@ class MangaDetailsDto
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
+            'descriptions' => $this->descriptions,
             'status' => $this->status,
             'status_translated' => $this->statusTranslated,
             'cover_filename' => $this->coverFilename,

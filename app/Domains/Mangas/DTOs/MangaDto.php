@@ -32,6 +32,9 @@ class MangaDto
             $latestChapterDate = Carbon::parse($manga->latest_chapter_date)->toISOString();
         }
 
+        $descriptions = $manga->description;
+        $defaultDesc = $descriptions['pt-br'] ?? $descriptions['pt'] ?? $descriptions['en'] ?? (reset($descriptions) ?: '');
+
         $statusTranslated = match ($manga->status) {
             'ongoing' => 'Em andamento',
             'completed' => 'Finalizado',
@@ -43,7 +46,7 @@ class MangaDto
         return new self(
             id: $manga->id,
             title: $manga->title,
-            description: $manga->description,
+            description: $defaultDesc,
             status: $manga->status,
             statusTranslated: $statusTranslated,
             coverFilename: $manga->cover_filename,

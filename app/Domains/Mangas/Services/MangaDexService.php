@@ -64,7 +64,7 @@ class MangaDexService
      * Fetch manga details and its cover art from MangaDex.
      *
      * @param string $mangaId
-     * @return array{id: string, title: string, description: ?string, status: ?string, cover_filename: ?string}
+     * @return array{id: string, title: string, description: array, status: ?string, cover_filename: ?string}
      */
     public function fetchDetails(string $mangaId): array
     {
@@ -80,7 +80,7 @@ class MangaDexService
         $attributes = $data['attributes'] ?? [];
 
         $title = $this->resolveLocalizedText($attributes['title'] ?? []);
-        $description = $this->resolveLocalizedText($attributes['description'] ?? []) ?: null;
+        $description = $attributes['description'] ?? [];
 
         // Find cover filename in relationships
         $coverFilename = null;

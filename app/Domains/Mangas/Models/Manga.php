@@ -85,6 +85,38 @@ class Manga extends Model
     }
 
     /**
+     * Get the localized descriptions.
+     *
+     * @param mixed $value
+     * @return array<string, string>
+     */
+    public function getDescriptionAttribute($value): array
+    {
+        if (empty($value)) {
+            return [];
+        }
+        $decoded = json_decode($value, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+        return [
+            'pt-br' => $value,
+            'en' => $value,
+        ];
+    }
+
+    /**
+     * Set the localized descriptions.
+     *
+     * @param mixed $value
+     * @return void
+     */
+    public function setDescriptionAttribute($value): void
+    {
+        $this->attributes['description'] = is_array($value) ? json_encode($value) : $value;
+    }
+
+    /**
      * Get the chapters for the manga.
      */
     public function chapters(): HasMany

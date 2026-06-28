@@ -394,4 +394,85 @@ class MangaTest extends TestCase
                 'quality' => 'A qualidade selecionada é inválida. Valores permitidos: data, data-saver.'
             ]);
     }
+
+    /**
+     * Test localized description flow and backward compatibility.
+     */
+    public function test_localized_description_flow_and_compatibility(): void
+    {
+        $mangaId = '391b0423-ae2d-49ab-b118-09193234b35e';
+        $chapterId = '88888888-8888-8888-8888-888888888888';
+
+        // 1. Test syncing localized descriptions from MangaDex
+        Http::fake([
+            "*/manga/{$mangaId}/feed*" => Http::response([
+                'data' => [
+                    [
+                        'id' => $chapterId,
+                        'type' => 'chapter',
+                        'attributes' => [
+                            'chapter' => '1',
+                            'title' => 'Chapter 1 Title',
+                            'volume' => '1',
+                            'translatedLanguage' => 'en',
+                        ]
+                    ]
+                ]
+            ], 200),
+            "*/manga/{$mangaId}*" => Http::response([
+                'data' => [
+                    'id' => $mangaId,
+                    'type' => 'manga',
+                    'attributes' => [
+                        'title' => ['en' => 'Manga Title Name'],
+                        'description' => [
+                            'pt-br' => 'Descrição em PT-BR',
+                            'en' => 'Description in English',
+                        ],
+                        'status' => 'ongoing',
+                    ],
+                    'relationships' => [
+                        [
+                            'type' => 'cover_art',
+                            'attributes' => ['fileName' => 'cover.jpg']
+                        ]
+                    ]
+                ]
+            ], 200)
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->getJson("/api/manga/{$mangaId}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('id', $mangaId)
+            ->assertJsonPath('description', 'Descrição em PT-BR')
+            ->assertJsonPath('descriptions.pt-br', 'Descrição em PT-BR')
+            ->assertJsonPath('descriptions.en', 'Description in English');
+
+        // Check if database contains json encoded string
+        $manga = Manga::find($mangaId);
+        $this->assertIsArray($manga->description);
+        $this->assertEquals('Descrição em PT-BR', $manga->description['pt-br']);
+
+        // 2. Test backward compatibility: old plain text record in database
+        $legacyMangaId = '99999999-9999-9999-9999-999999999999';
+        DB::table('mangas')->insert([
+            'id' => $legacyMangaId,
+            'title' => 'Legacy Manga',
+            'description' => 'Plain text description legacy',
+            'last_synced_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $responseLegacy = $this->actingAs($this->user)
+            ->getJson("/api/manga/{$legacyMangaId}");
+
+        $responseLegacy->assertStatus(200)
+            ->assertJsonPath('id', $legacyMangaId)
+            ->assertJsonPath('description', 'Plain text description legacy')
+            ->assertJsonPath('descriptions.pt-br', 'Plain text description legacy')
+            ->assertJsonPath('descriptions.en', 'Plain text description legacy');
+    }
 }
